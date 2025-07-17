@@ -8,10 +8,10 @@
 <div align="center">
 
   [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-  [![GitHub Stars](https://img.shields.io/github/stars/YOUR_USERNAME/YOUR_REPO_NAME?style=flat)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/stargazers)
-  [![GitHub Issues](https://img.shields.io/github/issues/YOUR_USERNAME/YOUR_REPO_NAME)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/issues)
-  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/YOUR_USERNAME/YOUR_REPO_NAME)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/pulls)
-  [![License](https://img.shields.io/github/license/YOUR_USERNAME/YOUR_REPO_NAME)](/LICENSE)
+  [![GitHub Stars](https://img.shields.io/github/stars/whaleOnearth/arxiv-weekly-popular?style=flat)](https://github.com/whaleOnearth/arxiv-weekly-popular/stargazers)
+  [![GitHub Issues](https://img.shields.io/github/issues/whaleOnearth/arxiv-weekly-popular)](https://github.com/whaleOnearth/arxiv-weekly-popular/issues)
+  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/whaleOnearth/arxiv-weekly-popular)](https://github.com/whaleOnearth/arxiv-weekly-popular/pulls)
+  [![License](https://img.shields.io/github/license/whaleOnearth/arxiv-weekly-popular)](/LICENSE)
   [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 </div>
@@ -231,8 +231,8 @@ Your daily email includes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+git clone https://github.com/whaleOnearth/arxiv-weekly-popular.git
+cd arxiv-weekly-popular
 
 # Install dependencies
 uv sync
