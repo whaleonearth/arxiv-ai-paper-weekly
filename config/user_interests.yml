@@ -1,0 +1,53 @@
+# User Research Interests Configuration
+# Edit this file to customize which papers you want to receive
+# No technical knowledge required - just add or remove items from the lists below
+
+# Research Areas: Broad fields you're interested in
+research_areas:
+  - machine learning      # Papers about ML algorithms and techniques
+  - computer vision       # Image and video processing research
+  - natural language processing  # Text processing and language models
+  - robotics             # Robotics and automation research
+  - artificial intelligence  # General AI research
+
+# ArXiv Categories: Specific academic categories
+# Find more categories at: https://arxiv.org/category_taxonomy
+categories:
+  - cs.AI                 # Artificial Intelligence
+  - cs.LG                 # Machine Learning
+  - cs.CV                 # Computer Vision  
+  - cs.CL                 # Computation and Language (NLP)
+  - cs.RO                 # Robotics
+
+# Keywords: Specific terms you want to see in papers
+keywords:
+  - neural networks       # Papers mentioning neural networks
+  - deep learning        # Deep learning related research
+  - transformers         # Transformer architecture papers
+  - diffusion models     # Diffusion model research
+  - reinforcement learning  # RL algorithms and applications
+  - large language models   # LLM research
+  - computer vision      # CV techniques and applications
+
+# Paper Sources: Where to look for trending papers
+# You can enable or disable different sources
+sources:
+  papers_with_code: true  # Papers that have available code
+  semantic_scholar: true  # Papers with high citation velocity
+  arxiv_recent: true     # Recent papers from arXiv
+  github_trending: true  # Papers linked to trending GitHub repos
+
+# Filtering Preferences
+filters:
+  min_github_stars: 10        # Minimum stars for code repositories
+  max_days_old: 7            # Only papers from last N days
+  require_code: false        # Only papers with available code
+  min_paper_length: 4        # Minimum pages (to filter out short papers)
+  
+# Email Preferences  
+email:
+  max_papers_per_email: 20   # Maximum papers to include in each email
+  include_abstracts: true    # Include paper abstracts in email
+  include_code_links: true   # Include links to code repositories
+  include_pdf_links: true    # Include links to PDF files
+  language: "English"        # Language for AI-generated summaries 

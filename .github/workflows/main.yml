@@ -1,0 +1,122 @@
+name: Send emails daily
+on:
+  workflow_dispatch:
+    inputs:
+      research_areas:
+        description: 'Research areas (comma-separated, e.g., "machine learning,computer vision")'
+        required: false
+        type: string
+      categories:
+        description: 'ArXiv categories (comma-separated, e.g., "cs.LG,cs.CV,cs.AI")'
+        required: false
+        type: string
+      keywords:
+        description: 'Keywords (comma-separated, e.g., "neural networks,transformers,deep learning")'
+        required: false
+        type: string
+      max_papers:
+        description: 'Maximum number of papers to include'
+        required: false
+        type: number
+        default: 50
+      days_back:
+        description: 'Number of days to look back for trending papers'
+        required: false
+        type: number
+        default: 7
+  schedule:
+    - cron: '0 22 * * *'
+
+jobs:
+  calculate-and-send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.REPOSITORY }}
+          ref: ${{ vars.REF }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: '0.5.4'
+
+      - name: Create dynamic user interests config
+        run: |
+          mkdir -p config
+          cat > config/user_interests_dynamic.yml << EOF
+          # Dynamically generated user interests configuration
+          # This file is created from GitHub Actions inputs and repository variables
+          
+          research_areas:
+          EOF
+          
+          # Add research areas from input or repository variable
+          AREAS="${{ github.event.inputs.research_areas || vars.RESEARCH_AREAS || 'machine learning,computer vision,natural language processing,artificial intelligence' }}"
+          echo "$AREAS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "categories:" >> config/user_interests_dynamic.yml
+          
+          # Add categories from input or repository variable
+          CATEGORIES="${{ github.event.inputs.categories || vars.CATEGORIES || 'cs.LG,cs.CV,cs.CL,cs.AI,cs.RO' }}"
+          echo "$CATEGORIES" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "keywords:" >> config/user_interests_dynamic.yml
+          
+          # Add keywords from input or repository variable
+          KEYWORDS="${{ github.event.inputs.keywords || vars.KEYWORDS || 'neural networks,deep learning,transformers,diffusion models,reinforcement learning,large language models' }}"
+          echo "$KEYWORDS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "sources:" >> config/user_interests_dynamic.yml
+          echo "  papers_with_code: true" >> config/user_interests_dynamic.yml
+          echo "  github_trending: true" >> config/user_interests_dynamic.yml
+          echo "  arxiv_recent: true" >> config/user_interests_dynamic.yml
+          echo "" >> config/user_interests_dynamic.yml
+          echo "filters:" >> config/user_interests_dynamic.yml
+          echo "  min_engagement_score: 10.0" >> config/user_interests_dynamic.yml
+          echo "  min_code_quality: 5.0" >> config/user_interests_dynamic.yml
+          echo "  require_code: false" >> config/user_interests_dynamic.yml
+          
+          echo "Generated user interests config:"
+          cat config/user_interests_dynamic.yml
+
+      - name: Run script
+        env:
+          # Email configuration (required)
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SENDER: ${{ secrets.SENDER }}
+          RECEIVER: ${{ secrets.RECEIVER }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          
+          # Discovery configuration
+          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || secrets.MAX_PAPER_NUM || '50' }}
+          DAYS_BACK: ${{ github.event.inputs.days_back || vars.DAYS_BACK || '7' }}
+          SEND_EMPTY: ${{ vars.SEND_EMPTY || 'false' }}
+          
+          # API tokens (optional but recommended)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # LLM configuration
+          USE_LLM_API: ${{ secrets.USE_LLM_API || '1' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+          LANGUAGE: ${{ vars.LANGUAGE || 'English' }}
+          
+          # Configuration file override
+          USER_INTERESTS_CONFIG: config/user_interests_dynamic.yml
+          
+        run: |
+          echo "Starting ArXiv Weekly Popular with engagement-based discovery..."
+          echo "Research Areas: ${{ github.event.inputs.research_areas || vars.RESEARCH_AREAS || 'default' }}"
+          echo "Categories: ${{ github.event.inputs.categories || vars.CATEGORIES || 'default' }}"
+          echo "Keywords: ${{ github.event.inputs.keywords || vars.KEYWORDS || 'default' }}"
+          echo "Max Papers: $MAX_PAPER_NUM"
+          echo "Days Back: $DAYS_BACK"
+          
+          uv run main.py

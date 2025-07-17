@@ -1,0 +1,117 @@
+name: Test workflow
+on:
+  workflow_dispatch:
+    inputs:
+      research_areas:
+        description: 'Research areas (comma-separated, e.g., "machine learning,computer vision")'
+        required: false
+        type: string
+      categories:
+        description: 'ArXiv categories (comma-separated, e.g., "cs.LG,cs.CV,cs.AI")'
+        required: false
+        type: string
+      keywords:
+        description: 'Keywords (comma-separated, e.g., "neural networks,transformers,deep learning")'
+        required: false
+        type: string
+      max_papers:
+        description: 'Maximum number of papers to include (test limit: 5)'
+        required: false
+        type: number
+        default: 5
+
+jobs:
+  calculate-and-send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.REPOSITORY }}
+          ref: ${{ vars.REF }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: '0.5.4'
+
+      - name: Create test user interests config
+        run: |
+          mkdir -p config
+          cat > config/user_interests_dynamic.yml << EOF
+          # Test configuration for ArXiv Weekly Popular
+          # This file is created from GitHub Actions test inputs
+          
+          research_areas:
+          EOF
+          
+          # Add research areas from input or use test defaults
+          AREAS="${{ github.event.inputs.research_areas || 'machine learning,computer vision' }}"
+          echo "$AREAS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "categories:" >> config/user_interests_dynamic.yml
+          
+          # Add categories from input or use test defaults
+          CATEGORIES="${{ github.event.inputs.categories || 'cs.LG,cs.CV,cs.AI' }}"
+          echo "$CATEGORIES" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "keywords:" >> config/user_interests_dynamic.yml
+          
+          # Add keywords from input or use test defaults
+          KEYWORDS="${{ github.event.inputs.keywords || 'neural networks,deep learning,transformers' }}"
+          echo "$KEYWORDS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
+          
+          echo "" >> config/user_interests_dynamic.yml
+          echo "sources:" >> config/user_interests_dynamic.yml
+          echo "  papers_with_code: true" >> config/user_interests_dynamic.yml
+          echo "  github_trending: true" >> config/user_interests_dynamic.yml
+          echo "  arxiv_recent: false" >> config/user_interests_dynamic.yml
+          echo "" >> config/user_interests_dynamic.yml
+          echo "filters:" >> config/user_interests_dynamic.yml
+          echo "  min_engagement_score: 5.0" >> config/user_interests_dynamic.yml
+          echo "  min_code_quality: 3.0" >> config/user_interests_dynamic.yml
+          echo "  require_code: false" >> config/user_interests_dynamic.yml
+          
+          echo "Generated test user interests config:"
+          cat config/user_interests_dynamic.yml
+
+      - name: Run test script
+        env:
+          # Email configuration (required)
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SENDER: ${{ secrets.SENDER }}
+          RECEIVER: ${{ secrets.RECEIVER }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          
+          # Test configuration
+          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || '5' }}
+          DAYS_BACK: '3'  # Shorter period for testing
+          SEND_EMPTY: 'false'
+          
+          # API tokens (optional but recommended)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # LLM configuration
+          USE_LLM_API: ${{ secrets.USE_LLM_API || '1' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+          LANGUAGE: ${{ vars.LANGUAGE || 'English' }}
+          
+          # Configuration file override
+          USER_INTERESTS_CONFIG: config/user_interests_dynamic.yml
+          
+        run: |
+          echo "Starting ArXiv Weekly Popular TEST with engagement-based discovery..."
+          echo "Research Areas: ${{ github.event.inputs.research_areas || 'machine learning,computer vision' }}"
+          echo "Categories: ${{ github.event.inputs.categories || 'cs.LG,cs.CV,cs.AI' }}"
+          echo "Keywords: ${{ github.event.inputs.keywords || 'neural networks,deep learning,transformers' }}"
+          echo "Max Papers (Test): 5"
+          echo "Days Back (Test): 3"
+          echo ""
+          echo "Running in DEBUG mode for testing..."
+          
+          uv run main.py --debug
