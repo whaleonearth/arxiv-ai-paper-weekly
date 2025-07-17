@@ -79,7 +79,48 @@
 2. Rename it in Settings if desired
 3. Update the README badges with your username/repo name
 
-### 2. Configure Your Research Interests
+### 2. Complete Configuration Guide
+
+#### Required Setup Locations
+
+**Secrets:** Go to **Settings** → **Secrets and variables** → **Actions** → **Secrets**
+
+![Secrets Configuration](./assets/secrets.png)
+
+**Variables:** Go to **Settings** → **Secrets and variables** → **Actions** → **Variables**
+
+![Repository Variables](./assets/repo_var.png)
+
+#### Complete Configuration Table
+
+| Configuration | Type | Required | Description | Example/Default |
+|---------------|------|----------|-------------|-----------------|
+| **EMAIL SETTINGS** |
+| `SMTP_SERVER` | Secret | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
+| `SMTP_PORT` | Secret | ✅ | SMTP port (usually 587 or 465) | `587` |
+| `SENDER` | Secret | ✅ | Email address to send from | `your.email@gmail.com` |
+| `SENDER_PASSWORD` | Secret | ✅ | Email password or app password | `your_app_password` |
+| `RECEIVER` | Secret | ✅ | Email address to receive reports | `your.email@gmail.com` |
+| **RESEARCH INTERESTS** |
+| `RESEARCH_AREAS` | Variable | ⚠️ | Default research areas (comma-separated) | `machine learning,computer vision,natural language processing` |
+| `CATEGORIES` | Variable | ⚠️ | Default arXiv categories (comma-separated) | `cs.LG,cs.CV,cs.CL,cs.AI` |
+| `KEYWORDS` | Variable | ⚠️ | Default keywords (comma-separated) | `neural networks,deep learning,transformers` |
+| **DISCOVERY SETTINGS** |
+| `MAX_PAPER_NUM` | Secret | ⚠️ | Maximum papers per email | `50` |
+| `DAYS_BACK` | Variable | ⚠️ | Days to look back for trending papers | `7` |
+| `GITHUB_TOKEN` | Secret | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
+| **AI SUMMARIZATION** |
+| `OPENAI_API_KEY` | Secret | ⚠️ | OpenAI API key for AI summaries | `sk-xxxxxxxxxxxx` |
+| `OPENAI_API_BASE` | Secret | ⚠️ | OpenAI API endpoint (for custom endpoints) | `https://api.openai.com/v1` |
+| `MODEL_NAME` | Secret | ⚠️ | LLM model for summaries | `gpt-4o` |
+| `USE_LLM_API` | Secret | ⚠️ | Enable AI summarization (1=enabled, 0=disabled) | `1` |
+| `LANGUAGE` | Variable | ⚠️ | Language for AI summaries | `English` |
+
+**Legend:**
+- ✅ **Required**: Must be set for basic functionality
+- ⚠️ **Optional**: Enhances functionality or provides defaults
+
+### 3. Configure Your Research Interests
 
 **Recommended: Use GitHub Actions Interface**
 1. Go to **Actions** tab in your repository
@@ -101,46 +142,9 @@
 2. Add your research areas, categories, and keywords
 3. Commit the changes
 
-### 3. Set Up Email Configuration
 
-Go to **Settings** → **Secrets and variables** → **Actions** → **Secrets**:
 
-![Secrets Configuration](./assets/secrets.png)
-
-**Required Email Secrets:**
-
-| Secret | Required | Description | Example |
-|--------|----------|-------------|---------|
-| `SMTP_SERVER` | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
-| `SMTP_PORT` | ✅ | SMTP port (usually 587 or 465) | `587` |
-| `SENDER` | ✅ | Email address to send from | `your.email@gmail.com` |
-| `SENDER_PASSWORD` | ✅ | Email password or app password | `your_app_password` |
-| `RECEIVER` | ✅ | Email address to receive reports | `your.email@gmail.com` |
-
-### 4. Optional: Advanced Configuration
-
-**Repository Variables** (Settings → Secrets and variables → Actions → Variables):
-
-![Repository Variables](./assets/repo_var.png)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `RESEARCH_AREAS` | Default research areas (comma-separated) | `machine learning,computer vision,natural language processing` |
-| `CATEGORIES` | Default arXiv categories (comma-separated) | `cs.LG,cs.CV,cs.CL,cs.AI` |
-| `KEYWORDS` | Default keywords (comma-separated) | `neural networks,deep learning,transformers` |
-| `DAYS_BACK` | Days to look back for trending papers | `7` |
-| `LANGUAGE` | Language for AI summaries | `English` |
-
-**Enhanced Feature Secrets:**
-
-| Secret | Description | Default |
-|--------|-------------|---------|
-| `GITHUB_TOKEN` | GitHub Personal Access Token (recommended) | Not required |
-| `OPENAI_API_KEY` | OpenAI API key for AI summaries | Uses local LLM if not provided |
-| `MODEL_NAME` | LLM model for summaries | `gpt-4o` |
-| `MAX_PAPER_NUM` | Maximum papers per email | `50` |
-
-### 5. Test Your Setup
+### 4. Test Your Setup
 
 1. Go to **Actions** → **"Test workflow"**
 2. Click **"Run workflow"** 
@@ -149,7 +153,7 @@ Go to **Settings** → **Secrets and variables** → **Actions** → **Secrets**
 
    ![Test Results](./assets/test.png)
 
-### 6. Enable Daily Reports
+### 5. Enable Daily Reports
 
 The system automatically runs daily at 22:00 UTC. You can:
 - Modify the schedule in `.github/workflows/main.yml`
