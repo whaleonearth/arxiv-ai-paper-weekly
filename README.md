@@ -25,6 +25,9 @@
 > [!NOTE]
 > **Engagement-Based Discovery**: This system discovers papers using GitHub activity, citations, code quality, and community buzz. No app installation required - just fork and configure!
 
+> [!TIP]
+> **🆓 100% FREE Operation**: Download any local LLM model and run everything locally! No API costs, no data sharing, complete privacy. Auto-detects GGUF and HuggingFace models - just drop files in `models/` folder and set `USE_LOCAL_MODEL=1`.
+
 ## 🧐 About <a name = "about"></a>
 
 > Find trending research papers that matter - papers with active code implementations, high GitHub engagement, and growing community interest!
@@ -48,10 +51,12 @@
 - **Smart Matching**: Papers ranked by relevance to your specific interests
 - **Flexible Configuration**: Easy updates without file editing
 
-### 🤖 **AI-Powered Summaries**
-- **Intelligent TL;DR**: AI-generated summaries for top papers
-- **Context-Aware**: Summaries include why papers are trending
-- **Technical & Accessible**: Written for both technical and non-technical readers
+### 🤖 **AI-Powered Summaries (100% FREE)**
+- **🆓 Local Models**: Download any LLM and run completely offline - no API costs!
+- **🔒 Privacy First**: Your data never leaves your computer
+- **🚀 Auto-Detection**: Supports GGUF and HuggingFace models - just drop and go
+- **☁️ Cloud Option**: Optional OpenAI/Anthropic APIs for premium quality
+- **🧠 Intelligent TL;DR**: Context-aware summaries explaining why papers are trending
 
 ### 📊 **Rich Email Reports**
 - **Trending Badges**: Visual indicators of why papers are popular
@@ -79,6 +84,9 @@
 2. Rename it in Settings if desired
 3. Update the README badges with your username/repo name
 
+> [!IMPORTANT]
+> **🆓 Want 100% FREE operation?** Just set up email settings below, then add a local model to `models/` folder and set `USE_LOCAL_MODEL=1`. No API costs, complete privacy!
+
 ### 2. Complete Configuration Guide
 
 #### Required Setup Locations
@@ -99,7 +107,7 @@
 |---------------|----------|-------------|-----------------|
 | **EMAIL SETTINGS** |
 | `SMTP_SERVER` | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
-| `SMTP_PORT` | ✅ | SMTP port (usually 587 or 465) | `587` |
+| `SMTP_PORT` | ✅ | SMTP port (investigate your email port) | `465` |
 | `SENDER` | ✅ | Email address to send from | `your.email@gmail.com` |
 | `SENDER_PASSWORD` | ✅ | Email password or app password | `your_app_password` |
 | `RECEIVER` | ✅ | Email address to receive reports | `your.email@gmail.com` |
@@ -196,9 +204,11 @@ wget https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3
 USE_LOCAL_MODEL=1
 ```
 
-**☁️ Cloud API (Better Quality)**
+💰 **Cost Comparison**: OpenAI GPT-4o costs ~$0.10-0.30 per email (5-15 papers) vs **$0.00 with local models**
+
+**☁️ Cloud API (Premium Quality)**
 ```bash
-# Use cloud APIs for higher quality summaries
+# Use cloud APIs for higher quality summaries (costs ~$0.10-0.30 per email)
 USE_LLM_API=1
 OPENAI_API_KEY=sk-your-api-key
 OPENAI_API_BASE=https://api.openai.com/v1  # Optional: custom endpoint
