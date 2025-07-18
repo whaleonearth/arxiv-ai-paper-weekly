@@ -41,24 +41,24 @@
 
 ## ✨ Key Features
 
-### 🚀 **Engagement-Based Discovery** 
+###  **Engagement-Based Discovery** 
 - **Multi-Signal Trending**: Combines GitHub stars, citations, social buzz, and code quality
 - **Real-Time Analysis**: Live GitHub API integration for up-to-date metrics
 - **Code-First Approach**: Prioritizes papers with quality implementations
 
-### 🎯 **Personalized Recommendations**
+###  **Personalized Recommendations**
 - **Dynamic Keywords**: Set research interests directly in GitHub Actions
 - **Smart Matching**: Papers ranked by relevance to your specific interests
 - **Flexible Configuration**: Easy updates without file editing
 
-### 🤖 **AI-Powered Summaries (100% FREE)**
-- **🆓 Local Models**: Download any LLM and run completely offline - no API costs!
-- **🔒 Privacy First**: Your data never leaves your computer
-- **🚀 Auto-Detection**: Supports GGUF and HuggingFace models - just drop and go
-- **☁️ Cloud Option**: Optional OpenAI/Anthropic APIs for premium quality
-- **🧠 Intelligent TL;DR**: Context-aware summaries explaining why papers are trending
+###  **AI-Powered Summaries (100% FREE)**
+- **Local Models**: Download any LLM and run completely offline - no API costs!
+- **Privacy First**: Your data never leaves your computer
+- **Auto-Detection**: Supports GGUF and HuggingFace models - just drop and go
+- **Cloud Option**: Optional OpenAI/Anthropic APIs for premium quality
+- **Intelligent TL;DR**: Context-aware summaries explaining why papers are trending
 
-### 📊 **Rich Email Reports**
+###  **Rich Email Reports**
 - **Trending Badges**: Visual indicators of why papers are popular
 - **Engagement Metrics**: GitHub stats, citations, and code quality scores
 - **Multiple Code Links**: Primary repository plus additional implementations
@@ -85,7 +85,7 @@
 3. Update the README badges with your username/repo name
 
 > [!IMPORTANT]
-> **🆓 Want 100% FREE operation?** Just set up email settings below, then add a local model to `models/` folder and set `USE_LOCAL_MODEL=1`. No API costs, complete privacy!
+> ** Want 100% FREE operation?** Just set up email settings below, then add a local model to `models/` folder and set `USE_LOCAL_MODEL=1`. No API costs, complete privacy!
 
 ### 2. Complete Configuration Guide
 
@@ -108,9 +108,9 @@
 | **EMAIL SETTINGS** |
 | `SMTP_SERVER` | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
 | `SMTP_PORT` | ✅ | SMTP port (investigate your email port) | `465` |
-| `SENDER` | ✅ | Email address to send from | `your.email@gmail.com` |
+| `SENDER_EMAIL` | ✅ | Email address to send from | `your.email@gmail.com` |
 | `SENDER_PASSWORD` | ✅ | Email password or app password | `your_app_password` |
-| `RECEIVER` | ✅ | Email address to receive reports | `your.email@gmail.com` |
+| `RECEIVER_EMAIL` | ✅ | Email address to receive reports | `your.email@gmail.com` |
 | **AI SUMMARIZATION** |
 | `USE_LOCAL_MODEL` | ⚠️ | **Auto-detect local models (1=yes, 0=no)** | `0` |
 | `USE_LLM_API` | ⚠️ | Use cloud API for summaries (1=yes, 0=no) | `0` |
@@ -373,14 +373,6 @@ graph TD
     K[GitHub Actions] --> L[Dynamic Configuration]
     L --> A
 ```
-
-## 📊 Performance
-
-- **✅ 97% test coverage** for core discovery components
-- **✅ 49/49 tests passing** with comprehensive edge case handling
-- **✅ Production-ready** error handling and logging
-- **✅ Rate limiting** for all external APIs
-- **✅ Graceful degradation** when services are unavailable
 
 ## 🗺️ Roadmap
 
