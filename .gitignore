@@ -8,6 +8,9 @@ wheels/
 *.egg-info
 .env
 
+# IDE and editor files
+.cursorrules
+
 # Virtual environments
 .venv
 test.ipynb
