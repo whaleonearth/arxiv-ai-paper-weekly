@@ -1,29 +1,29 @@
+# Test configuration for quick local testing
 research_areas:
   - machine learning
-  - computer vision
+  - AI
 
 categories:
-  - cs.LG
-  - cs.CV
   - cs.AI
+  - cs.LG
 
 keywords:
   - neural networks
   - deep learning
-  - transformers
 
 sources:
-  papers_with_code: true
-  github_trending: false
-  arxiv_recent: false
+  arxiv_api: true
+  semantic_scholar: false  # Disable to avoid rate limiting
+  enrich_with_papers_with_code: false  # Disable slow enrichment
+  papers_with_code: false
+  github_trending: false  # Disable to avoid timezone issues in test
 
 filters:
-  min_engagement_score: 5.0
-  min_code_quality: 3.0
-  require_code: false
+  min_engagement_score: 1.0
+  max_days_old: 1  # Very short for testing
 
 email:
-  max_papers_per_email: 10
+  max_papers_per_email: 2
   include_abstracts: true
   include_code_links: true
   include_pdf_links: true

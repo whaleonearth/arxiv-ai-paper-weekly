@@ -345,7 +345,7 @@ def main() -> None:
         logger.info("Top trending papers:")
         for i, paper in enumerate(papers[:5], 1):
             score = paper.trending_score
-            sources = ", ".join(paper.trending_reasons) if paper.trending_reasons else "general"
+            sources = ", ".join([r.value for r in paper.trending_reasons]) if paper.trending_reasons else "general"
             logger.info(f"  {i}. {paper.title} (score: {score:.1f}, reasons: {sources})")
         
         # Generate AI summaries for top papers

@@ -71,18 +71,23 @@ jobs:
           # Add source configuration optimized for speed testing
           cat >> config/user_interests_dynamic.yml << EOF
           
-          source:
+          sources:
             arxiv_api: true
             semantic_scholar: false  # Disable to avoid rate limiting for testing
             enrich_with_papers_with_code: false  # Disable slow enrichment for testing
             papers_with_code: false
             github_trending: false  # Disable to speed up testing
           
-          discovery:
-            max_papers: ${{ github.event.inputs.max_papers || 3 }}
-            days_back: 2  # Very short period for testing
+          filters:
             min_engagement_score: 1.0  # Lower threshold for testing
-            enable_summaries: true  # Keep LLM summaries enabled
+            max_days_old: 2  # Very short period for testing
+          
+          email:
+            max_papers_per_email: ${{ github.event.inputs.max_papers || 3 }}
+            include_abstracts: true
+            include_code_links: true
+            include_pdf_links: true
+            language: "English"
           EOF
           
           echo "Generated test configuration:"

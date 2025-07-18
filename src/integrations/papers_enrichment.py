@@ -351,15 +351,21 @@ class PapersWithCodeEnricher:
             
             repository = CodeRepository(
                 url=url,
-                owner=owner,
                 name=name,
                 description=repo_data.get('description', ''),
                 stars=repo_data.get('stars', 0) or 0,
                 forks=repo_data.get('forks', 0) or 0,
-                language=repo_data.get('language', ''),
-                last_update=None,  # Papers with Code doesn't provide this
-                is_official=repo_data.get('is_official', False),
-                framework=repo_data.get('framework', '')
+                primary_language=repo_data.get('language', ''),
+                # Note: Papers with Code doesn't provide detailed GitHub data
+                # Issues, PRs, commit dates, etc. would need GitHub API integration
+                issues_count=0,  # Not available from Papers with Code
+                pull_requests_count=0,  # Not available from Papers with Code  
+                last_commit_date=None,  # Not available from Papers with Code
+                topics=[],  # Not available from Papers with Code
+                has_documentation=False,  # Would need to check README/docs
+                has_tests=False,  # Would need to check for test files
+                has_examples=False,  # Would need to check for example files
+                license_type=None  # Not available from Papers with Code
             )
             
             return repository

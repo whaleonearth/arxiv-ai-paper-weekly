@@ -380,20 +380,37 @@ class GitHubTrendingConverter:
             has_examples=self._has_examples(repo),
         )
         
+        # Convert dates to timezone-aware UTC for consistent comparison
+        now_utc = datetime.now(timezone.utc)
+        
+        # Ensure repo.created_at is timezone-aware
+        if repo.created_at.tzinfo is None:
+            created_at_utc = repo.created_at.replace(tzinfo=timezone.utc)
+        else:
+            created_at_utc = repo.created_at.astimezone(timezone.utc)
+            
+        # Ensure repo.pushed_at is timezone-aware  
+        if repo.pushed_at and repo.pushed_at.tzinfo is None:
+            pushed_at_utc = repo.pushed_at.replace(tzinfo=timezone.utc)
+        elif repo.pushed_at:
+            pushed_at_utc = repo.pushed_at.astimezone(timezone.utc)
+        else:
+            pushed_at_utc = now_utc
+        
         # Create engagement metrics
-        engagement = EngagementMetrics(
+        engagement_metrics = EngagementMetrics(
             github_stars=repo.stars,
             github_forks=repo.forks,
             github_issues=repo.open_issues,
-            days_since_publication=max(1, (datetime.now(timezone.utc) - repo.created_at).days),
-            last_activity_date=repo.pushed_at
+            days_since_publication=max(1, (now_utc - created_at_utc).days),
+            last_activity_date=pushed_at_utc
         )
         
         # Determine trending reasons
         trending_reasons = []
         if repo.stars > 100:
             trending_reasons.append(TrendingReason.HIGH_GITHUB_ACTIVITY)
-        if (datetime.now(timezone.utc) - repo.created_at).days <= 30:
+        if (now_utc - created_at_utc).days <= 30:
             trending_reasons.append(TrendingReason.RECENT_PUBLICATION)
         if code_repo.calculate_quality_score() >= 7:
             trending_reasons.append(TrendingReason.CODE_QUALITY)
@@ -418,7 +435,7 @@ class GitHubTrendingConverter:
             arxiv_id=arxiv_id,
             arxiv_url=arxiv_url,
             primary_repository=code_repo,
-            engagement=engagement,
+            engagement=engagement_metrics,
             trending_reasons=trending_reasons,
             discovery_source="github_trending",
             categories=self._extract_categories(repo),
