@@ -372,6 +372,29 @@ graph TD
 - **✅ Rate limiting** for all external APIs
 - **✅ Graceful degradation** when services are unavailable
 
+## 🗺️ Roadmap
+
+### 🎯 **Next Release (v0.5.0)**
+- [ ] **GitHub Pages Website**: Daily-updated web dashboard instead of email-only
+- [ ] **One-Click Setup**: Template repository with pre-configured workflows
+- [ ] **Mobile-Responsive**: Better email templates and web interface
+- [ ] **Research Templates**: Pre-configured interest profiles (ML, CV, NLP, Robotics)
+
+### 🚀 **Upcoming Features** 
+- [ ] **Web Configuration**: GUI for research interests (no more GitHub settings)
+- [ ] **Multi-Channel Notifications**: Slack, Discord, Teams integration
+- [ ] **Paper Bookmarking**: Save and organize favorite papers
+- [ ] **Historical Archive**: Browse past discoveries and research trends
+- [ ] **RSS/JSON Feeds**: Machine-readable outputs for other tools
+
+### 💡 **Future Vision**
+- [ ] **Collaborative Research**: Team accounts with shared interests  
+- [ ] **Integration Hub**: Zotero, Notion, Obsidian connectors
+- [ ] **Research Analytics**: Personal insights and field trend analysis
+- [ ] **Progressive Web App**: Offline access and mobile experience
+
+*Want to contribute? Pick a feature and let's build the future of research discovery together!*
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
