@@ -108,9 +108,9 @@
 | **EMAIL SETTINGS** |
 | `SMTP_SERVER` | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
 | `SMTP_PORT` | ✅ | SMTP port (investigate your email port) | `465` |
-| `SENDER_EMAIL` | ✅ | Email address to send from | `your.email@gmail.com` |
+| `SENDER` | ✅ | Email address to send from | `your.email@gmail.com` |
 | `SENDER_PASSWORD` | ✅ | Email password or app password | `your_app_password` |
-| `RECEIVER_EMAIL` | ✅ | Email address to receive reports | `your.email@gmail.com` |
+| `RECEIVER` | ✅ | Email address to receive reports | `your.email@gmail.com` |
 | **AI SUMMARIZATION** |
 | `USE_LOCAL_MODEL` | ⚠️ | **Auto-detect local models (1=yes, 0=no)** | `0` |
 | `USE_LLM_API` | ⚠️ | Use cloud API for summaries (1=yes, 0=no) | `0` |

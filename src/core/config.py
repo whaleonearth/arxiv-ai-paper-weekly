@@ -108,9 +108,9 @@ class EmailConfig:
             # SMTP settings from environment
             smtp_server=os.getenv('SMTP_SERVER', ''),
             smtp_port=smtp_port,
-            sender_email=os.getenv('SENDER_EMAIL', ''),
+            sender_email=os.getenv('SENDER', ''),
             sender_password=os.getenv('SENDER_PASSWORD', ''),
-            receiver_email=os.getenv('RECEIVER_EMAIL', '')
+            receiver_email=os.getenv('RECEIVER', '')
         )
 
 
@@ -149,15 +149,22 @@ class UserInterests:
         required_email_fields = [
             'smtp_server', 'sender_email', 'sender_password', 'receiver_email'
         ]
+        # Map field names to actual environment variable names
+        field_to_env_var = {
+            'smtp_server': 'SMTP_SERVER',
+            'sender_email': 'SENDER', 
+            'sender_password': 'SENDER_PASSWORD',
+            'receiver_email': 'RECEIVER'
+        }
         missing_fields = [
             field for field in required_email_fields 
             if not getattr(self.email, field)
         ]
         if missing_fields:
-            missing_upper = [field.upper() for field in missing_fields]
+            missing_env_vars = [field_to_env_var[field] for field in missing_fields]
             raise ValueError(
                 f"Email Configuration Error: Missing required environment variables: "
-                f"{', '.join(missing_upper)}. "
+                f"{', '.join(missing_env_vars)}. "
                 f"Please set these in your GitHub repository secrets."
             )
     
