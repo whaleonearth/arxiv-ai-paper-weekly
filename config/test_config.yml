@@ -14,7 +14,7 @@ keywords:
 sources:
   arxiv_api: true
   semantic_scholar: false  # Disable to avoid rate limiting
-  enrich_with_papers_with_code: false  # Disable slow enrichment
+  enrich_with_papers_with_code: true  # Enable to show code buttons
   papers_with_code: false
   github_trending: false  # Disable to avoid timezone issues in test
 

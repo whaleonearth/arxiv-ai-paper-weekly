@@ -196,6 +196,44 @@ flowchart TD
 | `MAX_PAPER_NUM` | ⚠️ | Maximum papers per email | `50` |
 | `GH_TOKEN` | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
 
+#### 📧 **Gmail Users: App Password Setup**
+
+**⚠️ Important**: If using Gmail, you **MUST** use an App Password, not your regular password.
+
+**Why?** Gmail requires App Passwords for third-party applications since 2022 for security.
+
+**Quick Setup (3 minutes):**
+
+1. **Enable 2-Factor Authentication**
+   - Go to [Google Account Security](https://myaccount.google.com/security)
+   - Click **"2-Step Verification"** → Follow setup with your phone
+   - **Required**: Must complete this first
+
+2. **Generate App Password** 
+   - Go to [App Passwords](https://myaccount.google.com/apppasswords)
+   - Sign in again to verify identity
+   - Click **"Select app"** → Choose **"Other (Custom name)"**
+   - Enter name: `"ArXiv Weekly Popular"`
+   - Click **"Generate"**
+   - **Copy the 16-character password** (e.g., `abcd efgh ijkl mnop`)
+
+3. **Use in GitHub Secrets**
+   ```
+   SMTP_SERVER=smtp.gmail.com
+   SMTP_PORT=465
+   SENDER=your.email@gmail.com
+   SENDER_PASSWORD=abcd efgh ijkl mnop
+   RECEIVER=recipient@gmail.com
+   ```
+
+**🚨 Common Error**: `(535, 'Username and Password not accepted')`
+**Solution**: You're using your regular password instead of App Password
+
+**Alternative Email Providers** (if you prefer not to use Gmail):
+- **Outlook**: `smtp-mail.outlook.com` (port 587)
+- **Yahoo**: `smtp.mail.yahoo.com` (port 465) 
+- **Custom SMTP**: Contact your email provider for settings
+
 **📋 VARIABLES** (Settings → Secrets and variables → Actions → Variables)
 
 | Configuration | Required | Description | Example/Default |
