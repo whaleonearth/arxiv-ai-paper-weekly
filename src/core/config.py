@@ -15,10 +15,37 @@ from loguru import logger
 @dataclass
 class FilterConfig:
     """Configuration for filtering papers."""
+    # New engagement-based filtering (from GitHub Actions)
+    min_engagement_score: float = 10.0
+    min_code_quality: float = 5.0
+    require_code: bool = False
+    
+    # Legacy filtering (for backward compatibility)
     min_github_stars: int = 10
     max_days_old: int = 7
-    require_code: bool = False
     min_paper_length: int = 4
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'FilterConfig':
+        """Create FilterConfig from dictionary, handling both old and new formats.
+        
+        Args:
+            data: Dictionary with filter configuration
+            
+        Returns:
+            FilterConfig instance
+        """
+        # Create instance with defaults
+        instance = cls()
+        
+        # Update with provided values, handling both old and new parameter names
+        for key, value in data.items():
+            if hasattr(instance, key):
+                setattr(instance, key, value)
+            else:
+                logger.warning(f"Unknown filter parameter '{key}' ignored")
+        
+        return instance
 
 
 @dataclass
@@ -273,7 +300,7 @@ def load_user_interests(config_path: Optional[str] = None) -> UserInterests:
             raise ValueError("'email' must be a dictionary")
         
         sources = SourceConfig(**sources_data)
-        filters = FilterConfig(**filters_data)
+        filters = FilterConfig.from_dict(filters_data)
         email = EmailConfig.from_env(email_data)
         
         interests = UserInterests(
