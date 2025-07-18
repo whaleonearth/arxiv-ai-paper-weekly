@@ -313,7 +313,7 @@ class PaperDiscoveryService:
             try:
                 arxiv_papers = discover_recent_papers(
                     user_interests=self.user_interests,
-                    days_back=max(self.config.days_back, 14),  # Minimum 14 days for arXiv to ensure papers found
+                    days_back=14,  # Fixed 14 days for bleeding-edge recent papers (Tier 1)
                     max_papers=self.config.max_papers_per_source
                 )
                 all_papers.extend(arxiv_papers)
@@ -325,21 +325,39 @@ class PaperDiscoveryService:
                 logger.error(error_msg)
                 source_stats["arxiv_api"] = 0
         
-        # Primary sources: Semantic Scholar (impactful papers)
+        # Primary sources: Semantic Scholar (impactful papers with adaptive fallback)
         if self.config.use_semantic_scholar:
             try:
                 semantic_papers = discover_impactful_papers(
                     user_interests=self.user_interests,
-                    days_back=min(self.config.days_back * 8, 60),  # Much longer period for citations (up to 60 days)
+                    days_back=90,  # Fixed 90 days for citation velocity analysis (Tier 2)
                     max_papers=self.config.max_papers_per_source
                 )
+                
+                # Adaptive fallback: if citation velocity filtering is too strict, try lenient mode
+                if len(semantic_papers) == 0:
+                    logger.warning("Semantic Scholar citation velocity filtering found 0 papers, trying lenient mode...")
+                    semantic_papers = discover_impactful_papers(
+                        user_interests=self.user_interests,
+                        days_back=60,  # Shorter window, any citations
+                        max_papers=self.config.max_papers_per_source,
+                        lenient_mode=True  # Disable citation velocity filtering for fallback
+                    )
+                
+                # Final fallback: if still 0 papers, continue without Semantic Scholar (Option C mode)
+                if len(semantic_papers) == 0:
+                    logger.info("Semantic Scholar found 0 papers after fallback attempts - continuing with arXiv + GitHub strategy")
+                else:
+                    logger.info(f"Semantic Scholar: {len(semantic_papers)} papers (tiered strategy working)")
+                    
                 all_papers.extend(semantic_papers)
                 source_stats["semantic_scholar"] = len(semantic_papers)
-                logger.info(f"Semantic Scholar: {len(semantic_papers)} papers")
+                
             except Exception as e:
                 error_msg = f"Semantic Scholar error: {e}"
                 errors.append(error_msg)
                 logger.error(error_msg)
+                logger.info("Semantic Scholar failed - continuing with arXiv + GitHub strategy")
                 source_stats["semantic_scholar"] = 0
         
         # Legacy source: Papers with Code (only if enabled)
@@ -363,7 +381,7 @@ class PaperDiscoveryService:
             try:
                 github_papers = discover_trending_papers_from_github(
                     github_token=self.config.github_token,
-                    days_back=self.config.days_back,
+                    days_back=30,  # Fixed 30 days for active implementations (Tier 3)
                     max_papers=self.config.max_papers_per_source
                 )
                 all_papers.extend(github_papers)

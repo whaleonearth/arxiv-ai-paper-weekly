@@ -75,7 +75,8 @@ class SemanticScholarAPI:
         self, 
         user_interests: UserInterests,
         days_back: int = 30,  # Semantic Scholar works better with longer periods
-        max_results: int = 100
+        max_results: int = 100,
+        lenient_mode: bool = False
     ) -> List[Dict[str, Any]]:
         """Search for papers based on user interests.
         
@@ -83,6 +84,7 @@ class SemanticScholarAPI:
             user_interests: User's research interests
             days_back: Number of days to look back
             max_results: Maximum number of papers to return
+            lenient_mode: If True, disable citation velocity filtering (fallback mode)
             
         Returns:
             List of paper data from Semantic Scholar API
@@ -96,7 +98,7 @@ class SemanticScholarAPI:
             try:
                 logger.debug(f"Searching Semantic Scholar with query: {query[:100]}...")
                 
-                query_papers = self._search_query(query, max_results // len(queries))
+                query_papers = self._search_query(query, max_results // len(queries), lenient_mode)
                 papers.extend(query_papers)
                 
                 logger.debug(f"Found {len(query_papers)} papers for query")
@@ -110,18 +112,22 @@ class SemanticScholarAPI:
                 continue
         
         # Filter by publication date and remove duplicates
-        cutoff_date = datetime.now() - timedelta(days=days_back)
-        unique_papers = self._filter_and_deduplicate(papers, cutoff_date)
+        # Tiered strategy: 90-day window for papers with early citation impact
+        cutoff_date = datetime.now() - timedelta(days=90)  # Focus on last 3 months for citation velocity
+        
+        logger.debug(f"Semantic Scholar filtering: {len(papers)} total papers found, cutoff date: {cutoff_date.strftime('%Y-%m-%d')}")
+        unique_papers = self._filter_and_deduplicate(papers, cutoff_date, lenient_mode)
         
         logger.info(f"Found {len(unique_papers)} unique papers from Semantic Scholar")
         return unique_papers[:max_results]
     
-    def _search_query(self, query: str, limit: int) -> List[Dict[str, Any]]:
+    def _search_query(self, query: str, limit: int, lenient_mode: bool) -> List[Dict[str, Any]]:
         """Execute a single search query.
         
         Args:
             query: Search query string
             limit: Maximum results for this query
+            lenient_mode: If True, disable citation velocity filtering (fallback mode)
             
         Returns:
             List of paper data
@@ -233,35 +239,82 @@ class SemanticScholarAPI:
     def _filter_and_deduplicate(
         self, 
         papers: List[Dict[str, Any]], 
-        cutoff_date: datetime
+        cutoff_date: datetime,
+        lenient_mode: bool
     ) -> List[Dict[str, Any]]:
         """Filter papers by date and remove duplicates.
         
         Args:
             papers: List of papers to filter
             cutoff_date: Minimum publication date
+            lenient_mode: If True, skip citation velocity filtering
             
         Returns:
             Filtered and deduplicated papers
         """
         seen_ids = set()
         unique_papers = []
+        filtered_by_date = 0
+        filtered_by_velocity = 0
+        filtered_by_duplicate = 0
         
         for paper in papers:
             # Check publication date
             pub_date = self._parse_publication_date(paper)
-            if pub_date and pub_date < cutoff_date:
+            if pub_date < cutoff_date:
+                filtered_by_date += 1
+                continue
+            
+            # Filter by citation velocity for recent papers (Semantic Scholar's unique value)
+            if not lenient_mode and not self._has_citation_velocity(paper, pub_date):
+                filtered_by_velocity += 1  # Count citation velocity filtering separately
                 continue
             
             # Remove duplicates based on paper ID
             paper_id = paper.get('paperId')
             if not paper_id or paper_id in seen_ids:
+                filtered_by_duplicate += 1
                 continue
                 
             seen_ids.add(paper_id)
             unique_papers.append(paper)
         
+        if filtered_by_date > 0 or filtered_by_velocity > 0 or filtered_by_duplicate > 0:
+            logger.debug(f"Semantic Scholar filtering: {len(papers)} input → {len(unique_papers)} output "
+                        f"(filtered: {filtered_by_date} by date, {filtered_by_velocity} by citation velocity, {filtered_by_duplicate} by duplicate)")
+        
         return unique_papers
+    
+    def _has_citation_velocity(self, paper: Dict[str, Any], pub_date: datetime) -> bool:
+        """Check if paper has high citation velocity for its age.
+        
+        This is Semantic Scholar's unique value - finding recent papers getting cited quickly.
+        
+        Args:
+            paper: Paper data from Semantic Scholar
+            pub_date: Publication date
+            
+        Returns:
+            True if paper has impressive citation velocity for recent work
+        """
+        citations = paper.get('citationCount', 0)
+        influential_citations = paper.get('influentialCitationCount', 0)
+        
+        # Calculate days since publication
+        days_old = (datetime.now() - pub_date).days
+        days_old = max(1, days_old)  # Avoid division by zero
+        
+        # Citation velocity thresholds based on age
+        if days_old <= 30:  # Very recent (last month)
+            # Even 1-2 citations is impressive for very new papers
+            return citations >= 1 or influential_citations >= 1
+        elif days_old <= 60:  # Recent (2 months)
+            # Need moderate citation activity
+            return citations >= 3 or influential_citations >= 2
+        else:  # 60-90 days old
+            # Need good citation velocity to be considered trending
+            citations_per_month = (citations / days_old) * 30
+            return citations_per_month >= 2 or influential_citations >= 3
     
     def _parse_publication_date(self, paper: Dict[str, Any]) -> Optional[datetime]:
         """Parse publication date from paper data.
@@ -278,17 +331,24 @@ class SemanticScholarAPI:
             try:
                 return datetime.strptime(pub_date_str, '%Y-%m-%d')
             except ValueError:
-                pass
+                # Try other date formats
+                try:
+                    return datetime.strptime(pub_date_str, '%Y-%m')
+                except ValueError:
+                    pass
         
         # Fall back to year
         year = paper.get('year')
         if year:
             try:
-                return datetime(year, 1, 1)
+                return datetime(int(year), 1, 1)
             except (ValueError, TypeError):
                 pass
         
-        return None
+        # If no date available, assume it's recent enough to pass filter
+        # This prevents filtering out papers just because they lack date metadata
+        logger.debug(f"No publication date found for paper: {paper.get('title', 'Unknown')}")
+        return datetime.now()  # Return current date so it passes the filter
 
 
 class SemanticScholarConverter:
@@ -425,7 +485,8 @@ def discover_impactful_papers(
     user_interests: UserInterests,
     config: Optional[SemanticScholarConfig] = None,
     days_back: int = 30,
-    max_papers: int = 100
+    max_papers: int = 100,
+    lenient_mode: bool = False
 ) -> List[TrendingPaper]:
     """Discover impactful papers from Semantic Scholar.
     
@@ -434,15 +495,16 @@ def discover_impactful_papers(
         config: Semantic Scholar API configuration
         days_back: Days to look back for papers (longer periods work better)
         max_papers: Maximum number of papers to return
+        lenient_mode: If True, disable citation velocity filtering (fallback mode)
         
     Returns:
         List of trending papers sorted by impact and citations
     """
-    api = SemanticScholarAPI(config)
+    api = SemanticScholarAPI()
     converter = SemanticScholarConverter()
     
     # Get papers from Semantic Scholar
-    ss_papers = api.search_papers(user_interests, days_back, max_papers)
+    ss_papers = api.search_papers(user_interests, days_back, max_papers, lenient_mode)
     
     # Convert to TrendingPaper format
     trending_papers = []
@@ -454,5 +516,6 @@ def discover_impactful_papers(
     # Sort by trending score (impact-based for Semantic Scholar)
     trending_papers.sort(key=lambda p: p.trending_score, reverse=True)
     
-    logger.info(f"Discovered {len(trending_papers)} impactful papers from Semantic Scholar")
+    mode_desc = "lenient mode" if lenient_mode else "citation velocity mode"
+    logger.info(f"Discovered {len(trending_papers)} impactful papers from Semantic Scholar ({mode_desc})")
     return trending_papers 
