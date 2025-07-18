@@ -38,7 +38,12 @@ class PapersWithCodeAPI:
         Args:
             config: Configuration for the API client
         """
+        import os
         self.config = config or PapersWithCodeConfig()
+        # Allow environment variable override for faster testing
+        env_delay = os.getenv('PAPERS_WITH_CODE_RATE_LIMIT_DELAY')
+        if env_delay:
+            self.config.rate_limit_delay = float(env_delay)
         self.session = requests.Session()
         
         # Set up retry strategy

@@ -66,7 +66,7 @@ jobs:
           echo "" >> config/user_interests_dynamic.yml
           echo "sources:" >> config/user_interests_dynamic.yml
           echo "  papers_with_code: true" >> config/user_interests_dynamic.yml
-          echo "  github_trending: true" >> config/user_interests_dynamic.yml
+          echo "  github_trending: false" >> config/user_interests_dynamic.yml
           echo "  arxiv_recent: false" >> config/user_interests_dynamic.yml
           echo "" >> config/user_interests_dynamic.yml
           echo "filters:" >> config/user_interests_dynamic.yml
@@ -86,16 +86,21 @@ jobs:
           RECEIVER: ${{ secrets.RECEIVER }}
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           
-          # Test configuration
+          # Test configuration (optimized for speed)
           MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || '5' }}
           DAYS_BACK: '3'  # Shorter period for testing
           SEND_EMPTY: 'false'
           
+          # Speed optimizations for testing
+          GITHUB_RATE_LIMIT_DELAY: '0.1'  # Faster API calls (10x speed boost)
+          PAPERS_WITH_CODE_RATE_LIMIT_DELAY: '0.1'  # Faster API calls
+          
           # API tokens (optional but recommended)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-          # LLM configuration
-          USE_LLM_API: ${{ secrets.USE_LLM_API || '1' }}
+          # LLM configuration (disabled for faster testing)
+          USE_LLM_API: '0'
+          USE_LOCAL_MODEL: '0'
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
           MODEL_NAME: ${{ secrets.MODEL_NAME }}
