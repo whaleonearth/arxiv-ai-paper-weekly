@@ -68,6 +68,7 @@ def load_configuration() -> tuple[dict, dict]:
         "SEND_EMPTY": os.getenv("SEND_EMPTY", "false").lower() == "true",
         "DAYS_BACK": int(os.getenv("DAYS_BACK", "7")),
         "GITHUB_TOKEN": os.getenv("GITHUB_TOKEN"),
+        "USE_LOCAL_MODEL": os.getenv("USE_LOCAL_MODEL", "false").lower() == "true",
         "USE_LLM_API": os.getenv("USE_LLM_API", "false").lower() == "true",
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
         "OPENAI_API_BASE": os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
@@ -102,7 +103,24 @@ def setup_llm(env_config: dict) -> None:
     Args:
         env_config: Environment configuration
     """
-    if env_config["USE_LLM_API"]:
+    if env_config["USE_LOCAL_MODEL"]:
+        logger.info("Local model mode enabled - auto-detecting models...")
+        try:
+            set_global_llm(
+                api_key=env_config["OPENAI_API_KEY"],  # Fallback if no local model
+                base_url=env_config["OPENAI_API_BASE"],
+                model=env_config["MODEL_NAME"],
+                lang=env_config["LANGUAGE"],
+                use_local_model=True
+            )
+        except ValueError as e:
+            logger.error(f"Local model setup failed: {e}")
+            if not env_config["OPENAI_API_KEY"]:
+                logger.error("No local model found and no API key provided")
+                raise ValueError("Cannot initialize LLM: no local model found and no API key provided")
+            raise
+            
+    elif env_config["USE_LLM_API"]:
         if not env_config["OPENAI_API_KEY"]:
             raise ValueError("OPENAI_API_KEY required when USE_LLM_API is true")
         
@@ -114,7 +132,7 @@ def setup_llm(env_config: dict) -> None:
             lang=env_config["LANGUAGE"]
         )
     else:
-        logger.info("Using local LLM for paper summarization")
+        logger.info("Using default local LLM for paper summarization")
         set_global_llm(lang=env_config["LANGUAGE"])
 
 

@@ -93,28 +93,37 @@
 
 #### Complete Configuration Table
 
-| Configuration | Type | Required | Description | Example/Default |
-|---------------|------|----------|-------------|-----------------|
+**🔐 SECRETS** (Settings → Secrets and variables → Actions → Secrets)
+
+| Configuration | Required | Description | Example/Default |
+|---------------|----------|-------------|-----------------|
 | **EMAIL SETTINGS** |
-| `SMTP_SERVER` | Secret | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
-| `SMTP_PORT` | Secret | ✅ | SMTP port (usually 587 or 465) | `587` |
-| `SENDER` | Secret | ✅ | Email address to send from | `your.email@gmail.com` |
-| `SENDER_PASSWORD` | Secret | ✅ | Email password or app password | `your_app_password` |
-| `RECEIVER` | Secret | ✅ | Email address to receive reports | `your.email@gmail.com` |
-| **RESEARCH INTERESTS** |
-| `RESEARCH_AREAS` | Variable | ⚠️ | Default research areas (comma-separated) | `machine learning,computer vision,natural language processing` |
-| `CATEGORIES` | Variable | ⚠️ | Default arXiv categories (comma-separated) | `cs.LG,cs.CV,cs.CL,cs.AI` |
-| `KEYWORDS` | Variable | ⚠️ | Default keywords (comma-separated) | `neural networks,deep learning,transformers` |
-| **DISCOVERY SETTINGS** |
-| `MAX_PAPER_NUM` | Secret | ⚠️ | Maximum papers per email | `50` |
-| `DAYS_BACK` | Variable | ⚠️ | Days to look back for trending papers | `7` |
-| `GITHUB_TOKEN` | Secret | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
+| `SMTP_SERVER` | ✅ | Your email provider's SMTP server | `smtp.gmail.com` |
+| `SMTP_PORT` | ✅ | SMTP port (usually 587 or 465) | `587` |
+| `SENDER` | ✅ | Email address to send from | `your.email@gmail.com` |
+| `SENDER_PASSWORD` | ✅ | Email password or app password | `your_app_password` |
+| `RECEIVER` | ✅ | Email address to receive reports | `your.email@gmail.com` |
 | **AI SUMMARIZATION** |
-| `OPENAI_API_KEY` | Secret | ⚠️ | OpenAI API key for AI summaries | `sk-xxxxxxxxxxxx` |
-| `OPENAI_API_BASE` | Secret | ⚠️ | OpenAI API endpoint (for custom endpoints) | `https://api.openai.com/v1` |
-| `MODEL_NAME` | Secret | ⚠️ | LLM model for summaries | `gpt-4o` |
-| `USE_LLM_API` | Secret | ⚠️ | Enable AI summarization (1=enabled, 0=disabled) | `1` |
-| `LANGUAGE` | Variable | ⚠️ | Language for AI summaries | `English` |
+| `USE_LOCAL_MODEL` | ⚠️ | **Auto-detect local models (1=yes, 0=no)** | `0` |
+| `USE_LLM_API` | ⚠️ | Use cloud API for summaries (1=yes, 0=no) | `0` |
+| `OPENAI_API_KEY` | ⚠️ | OpenAI API key for cloud summaries | `sk-xxxxxxxxxxxx` |
+| `OPENAI_API_BASE` | ⚠️ | OpenAI API endpoint (for custom endpoints) | `https://api.openai.com/v1` |
+| `MODEL_NAME` | ⚠️ | LLM model name for cloud summaries | `gpt-4o` |
+| **DISCOVERY SETTINGS** |
+| `MAX_PAPER_NUM` | ⚠️ | Maximum papers per email | `50` |
+| `GITHUB_TOKEN` | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
+
+**📋 VARIABLES** (Settings → Secrets and variables → Actions → Variables)
+
+| Configuration | Required | Description | Example/Default |
+|---------------|----------|-------------|-----------------|
+| **RESEARCH INTERESTS** |
+| `RESEARCH_AREAS` | ⚠️ | Default research areas (comma-separated) | `machine learning,computer vision,natural language processing` |
+| `CATEGORIES` | ⚠️ | Default arXiv categories (comma-separated) | `cs.LG,cs.CV,cs.CL,cs.AI` |
+| `KEYWORDS` | ⚠️ | Default keywords (comma-separated) | `neural networks,deep learning,transformers` |
+| **SYSTEM SETTINGS** |
+| `DAYS_BACK` | ⚠️ | Days to look back for trending papers | `7` |
+| `LANGUAGE` | ⚠️ | Language for AI summaries | `English` |
 
 **Legend:**
 - ✅ **Required**: Must be set for basic functionality
@@ -176,11 +185,37 @@ Days Back: 5
 
 ### AI Summary Configuration
 
-Configure AI-powered summaries by setting these secrets:
-- `USE_LLM_API=1` - Use cloud LLM API 
-- `OPENAI_API_KEY` - Your OpenAI API key
-- `OPENAI_API_BASE` - API endpoint (supports OpenAI-compatible APIs)
-- `MODEL_NAME` - Model to use (e.g., `gpt-4o`, `claude-3-sonnet`)
+**🤖 Local Models (Privacy & Cost-Free)**
+```bash
+# 1. Download a model to the models/ directory
+mkdir models
+cd models
+wget https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf
+
+# 2. Enable local model mode
+USE_LOCAL_MODEL=1
+```
+
+**☁️ Cloud API (Better Quality)**
+```bash
+# Use cloud APIs for higher quality summaries
+USE_LLM_API=1
+OPENAI_API_KEY=sk-your-api-key
+OPENAI_API_BASE=https://api.openai.com/v1  # Optional: custom endpoint
+MODEL_NAME=gpt-4o  # Optional: specific model
+```
+
+**🔄 Configuration Priority**
+1. **USE_LOCAL_MODEL=1**: Auto-detect local models → Fallback to API if none found
+2. **USE_LLM_API=1**: Use cloud API (OpenAI, Anthropic, etc.)  
+3. **Default**: Use built-in Qwen model (downloads automatically)
+
+**📁 Supported Local Models**
+- **GGUF Models**: Fast, low memory (recommended)
+- **HuggingFace Models**: Full compatibility with transformers library
+- **Auto-Detection**: Just drop files in `models/` folder
+
+See `models/README.md` for detailed local model setup instructions.
 
 ### Discovery Sources
 
@@ -241,6 +276,9 @@ cd arxiv-weekly-popular
 # Install dependencies
 uv sync
 
+# Optional: Install transformers for advanced local models
+uv pip install transformers torch accelerate
+
 # Set environment variables
 export SMTP_SERVER="smtp.gmail.com"
 export SMTP_PORT="587"
@@ -256,6 +294,10 @@ uv run main.py --debug
 
 # Run dry-run (no email sent)
 uv run main.py --dry-run
+
+# Use local model (place model files in models/ directory)
+export USE_LOCAL_MODEL=1
+uv run main.py
 ```
 
 ## 🛠️ Troubleshooting
