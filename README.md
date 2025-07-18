@@ -535,10 +535,21 @@ Contributions are welcome! Please:
 
 ## 📃 License
 
-Distributed under the AGPLv3 License. See `LICENSE` for details.
+Distributed under the MIT License. See `LICENSE` for details.
+
+## 🎯 Attribution
+
+This project was inspired by the concept from [TideDra/zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily) but implements a fundamentally different approach:
+
+- **Original**: Zotero library similarity matching
+- **This project**: Engagement-based discovery using GitHub metrics, citations, and code quality
+- **Different algorithms**: Multi-signal ranking vs. library similarity
+- **Different data sources**: Papers with Code + GitHub + Semantic Scholar vs. Zotero
+- **Different architecture**: 10,000+ lines of new implementation with comprehensive testing
 
 ## 🙏 Acknowledgements
 
+- **TideDra/zotero-arxiv-daily** for the original inspiration of automated arXiv discovery
 - **Papers with Code** for providing excellent API access to academic papers
 - **GitHub** for trending repository data and free Actions
 - **OpenAI** for AI summarization capabilities

@@ -15,14 +15,15 @@ on:
         required: false
         type: string
       max_papers:
-        description: 'Maximum number of papers to include (test limit: 5)'
+        description: 'Maximum number of papers to include (test limit: 3)'
         required: false
         type: number
-        default: 5
+        default: 3
 
 jobs:
   calculate-and-send:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # Shorter timeout for faster testing
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,79 +47,83 @@ jobs:
           EOF
           
           # Add research areas from input or use test defaults
-          AREAS="${{ github.event.inputs.research_areas || 'machine learning,computer vision' }}"
+          AREAS="${{ github.event.inputs.research_areas || 'LLM,AI,Prompt' }}"
           echo "$AREAS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
           
-          echo "" >> config/user_interests_dynamic.yml
-          echo "categories:" >> config/user_interests_dynamic.yml
+          # Add categories section
+          cat >> config/user_interests_dynamic.yml << EOF
           
-          # Add categories from input or use test defaults
-          CATEGORIES="${{ github.event.inputs.categories || 'cs.LG,cs.CV,cs.AI' }}"
+          categories:
+          EOF
+          
+          CATEGORIES="${{ github.event.inputs.categories || 'cs.AI,cs.CV,cs.LG,cs.CL' }}"
           echo "$CATEGORIES" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
           
-          echo "" >> config/user_interests_dynamic.yml
-          echo "keywords:" >> config/user_interests_dynamic.yml
+          # Add keywords section
+          cat >> config/user_interests_dynamic.yml << EOF
           
-          # Add keywords from input or use test defaults
-          KEYWORDS="${{ github.event.inputs.keywords || 'neural networks,deep learning,transformers' }}"
+          keywords:
+          EOF
+          
+          KEYWORDS="${{ github.event.inputs.keywords || 'transformers,large language model,prompt,evaluation' }}"
           echo "$KEYWORDS" | tr ',' '\n' | sed 's/^/  - /' | sed 's/^  - *$//' | grep -v '^  - $' >> config/user_interests_dynamic.yml
           
-          echo "" >> config/user_interests_dynamic.yml
-          echo "sources:" >> config/user_interests_dynamic.yml
-          echo "  papers_with_code: true" >> config/user_interests_dynamic.yml
-          echo "  github_trending: false" >> config/user_interests_dynamic.yml
-          echo "  arxiv_recent: false" >> config/user_interests_dynamic.yml
-          echo "" >> config/user_interests_dynamic.yml
-          echo "filters:" >> config/user_interests_dynamic.yml
-          echo "  min_engagement_score: 1.0" >> config/user_interests_dynamic.yml
-          echo "  min_code_quality: 1.0" >> config/user_interests_dynamic.yml
-          echo "  require_code: false" >> config/user_interests_dynamic.yml
-          echo "" >> config/user_interests_dynamic.yml
-          echo "email:" >> config/user_interests_dynamic.yml
-          echo "  max_papers_per_email: 3" >> config/user_interests_dynamic.yml
+          # Add source configuration optimized for speed testing
+          cat >> config/user_interests_dynamic.yml << EOF
           
-          echo "Generated test user interests config:"
+          source:
+            arxiv_api: true
+            semantic_scholar: false  # Disable to avoid rate limiting for testing
+            enrich_with_papers_with_code: false  # Disable slow enrichment for testing
+            papers_with_code: false
+            github_trending: false  # Disable to speed up testing
+          
+          discovery:
+            max_papers: ${{ github.event.inputs.max_papers || 3 }}
+            days_back: 2  # Very short period for testing
+            min_engagement_score: 1.0  # Lower threshold for testing
+            enable_summaries: true  # Keep LLM summaries enabled
+          EOF
+          
+          echo "Generated test configuration:"
           cat config/user_interests_dynamic.yml
 
-      - name: Run test script
+      - name: Run ArXiv Weekly Popular Test
         env:
           # Email configuration (required)
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SENDER: ${{ secrets.SENDER }}
-          RECEIVER: ${{ secrets.RECEIVER }}
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
-          
-          # Test configuration (optimized for speed)
-          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || '3' }}
-          DAYS_BACK: '1'  # Very short period for testing
-          SEND_EMPTY: 'false'
-          
-          # Speed optimizations for testing
-          GH_RATE_LIMIT_DELAY: '0.1'  # Faster API calls (10x speed boost)
-          PAPERS_WITH_CODE_RATE_LIMIT_DELAY: '0.1'  # Faster API calls
+          RECEIVER: ${{ secrets.RECEIVER }}
           
           # API tokens (optional but recommended)
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           
-          # LLM configuration (disabled for faster testing)
-          USE_LLM_API: '0'
-          USE_LOCAL_MODEL: '0'
+          # LLM configuration (use cloud API for faster testing)
+          USE_LLM_API: 'true'  # Use cloud API instead of local model for speed
+          USE_LOCAL_MODEL: 'false'
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
           MODEL_NAME: ${{ secrets.MODEL_NAME }}
           LANGUAGE: ${{ vars.LANGUAGE || 'English' }}
+          
+          # Fast testing configuration
+          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || 3 }}
+          DAYS_BACK: '2'  # Very short period for testing
           
           # Configuration file override
           USER_INTERESTS_CONFIG: config/user_interests_dynamic.yml
           
         run: |
           echo "Starting ArXiv Weekly Popular TEST with engagement-based discovery..."
-          echo "Research Areas: ${{ github.event.inputs.research_areas || 'machine learning,computer vision' }}"
-          echo "Categories: ${{ github.event.inputs.categories || 'cs.LG,cs.CV,cs.AI' }}"
-          echo "Keywords: ${{ github.event.inputs.keywords || 'neural networks,deep learning,transformers' }}"
-          echo "Max Papers (Test): 5"
-          echo "Days Back (Test): 3"
+          echo "Research Areas: ${{ github.event.inputs.research_areas || 'LLM,AI,Prompt' }}"
+          echo "Categories: ${{ github.event.inputs.categories || 'cs.AI,cs.CV,cs.LG,cs.CL' }}"
+          echo "Keywords: ${{ github.event.inputs.keywords || 'transformers,large language model,prompt,evaluation' }}"
+          echo "Max Papers (Test): ${{ github.event.inputs.max_papers || 3 }}"
+          echo "Days Back (Test): 2"
+          echo "LLM: Cloud API (faster for testing)"
+          echo "Sources: arXiv only (fast mode)"
           echo ""
           echo "Running in DEBUG mode for testing..."
           
