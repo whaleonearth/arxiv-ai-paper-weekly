@@ -57,7 +57,7 @@ class GitHubTrendingAPI:
         self.base_url = "https://api.github.com"
         self.session = requests.Session()
         # Allow environment variable override for faster testing
-        self.rate_limit_delay = float(os.getenv('GITHUB_RATE_LIMIT_DELAY', str(rate_limit_delay)))
+        self.rate_limit_delay = float(os.getenv('GH_RATE_LIMIT_DELAY', str(rate_limit_delay)))
         
         # Set up authentication if token provided
         if token:

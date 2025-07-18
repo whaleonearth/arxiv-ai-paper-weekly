@@ -99,7 +99,7 @@ jobs:
           SEND_EMPTY: ${{ vars.SEND_EMPTY || 'false' }}
           
           # API tokens (optional but recommended)
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           
           # LLM configuration
           USE_LLM_API: ${{ secrets.USE_LLM_API || '1' }}

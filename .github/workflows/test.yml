@@ -92,11 +92,11 @@ jobs:
           SEND_EMPTY: 'false'
           
           # Speed optimizations for testing
-          GITHUB_RATE_LIMIT_DELAY: '0.1'  # Faster API calls (10x speed boost)
+          GH_RATE_LIMIT_DELAY: '0.1'  # Faster API calls (10x speed boost)
           PAPERS_WITH_CODE_RATE_LIMIT_DELAY: '0.1'  # Faster API calls
           
           # API tokens (optional but recommended)
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           
           # LLM configuration (disabled for faster testing)
           USE_LLM_API: '0'

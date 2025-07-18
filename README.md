@@ -119,7 +119,7 @@
 | `MODEL_NAME` | ⚠️ | LLM model name for cloud summaries | `gpt-4o` |
 | **DISCOVERY SETTINGS** |
 | `MAX_PAPER_NUM` | ⚠️ | Maximum papers per email | `50` |
-| `GITHUB_TOKEN` | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
+| `GH_TOKEN` | ⚠️ | GitHub Personal Access Token (better API limits) | `ghp_xxxxxxxxxxxx` |
 
 **📋 VARIABLES** (Settings → Secrets and variables → Actions → Variables)
 

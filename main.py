@@ -67,7 +67,7 @@ def load_configuration() -> tuple[dict, dict]:
         "MAX_PAPER_NUM": int(os.getenv("MAX_PAPER_NUM", "50")),
         "SEND_EMPTY": os.getenv("SEND_EMPTY", "false").lower() == "true",
         "DAYS_BACK": int(os.getenv("DAYS_BACK", "7")),
-        "GITHUB_TOKEN": os.getenv("GITHUB_TOKEN"),
+        "GITHUB_TOKEN": os.getenv("GH_TOKEN"),
         "USE_LOCAL_MODEL": os.getenv("USE_LOCAL_MODEL", "false").lower() == "true",
         "USE_LLM_API": os.getenv("USE_LLM_API", "false").lower() == "true",
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
