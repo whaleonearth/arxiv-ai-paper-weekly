@@ -70,9 +70,12 @@ jobs:
           echo "  arxiv_recent: false" >> config/user_interests_dynamic.yml
           echo "" >> config/user_interests_dynamic.yml
           echo "filters:" >> config/user_interests_dynamic.yml
-          echo "  min_engagement_score: 5.0" >> config/user_interests_dynamic.yml
-          echo "  min_code_quality: 3.0" >> config/user_interests_dynamic.yml
+          echo "  min_engagement_score: 1.0" >> config/user_interests_dynamic.yml
+          echo "  min_code_quality: 1.0" >> config/user_interests_dynamic.yml
           echo "  require_code: false" >> config/user_interests_dynamic.yml
+          echo "" >> config/user_interests_dynamic.yml
+          echo "email:" >> config/user_interests_dynamic.yml
+          echo "  max_papers_per_email: 3" >> config/user_interests_dynamic.yml
           
           echo "Generated test user interests config:"
           cat config/user_interests_dynamic.yml
@@ -87,8 +90,8 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           
           # Test configuration (optimized for speed)
-          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || '5' }}
-          DAYS_BACK: '3'  # Shorter period for testing
+          MAX_PAPER_NUM: ${{ github.event.inputs.max_papers || '3' }}
+          DAYS_BACK: '1'  # Very short period for testing
           SEND_EMPTY: 'false'
           
           # Speed optimizations for testing

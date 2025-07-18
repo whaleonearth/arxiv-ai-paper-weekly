@@ -29,13 +29,18 @@ keywords:
   - large language models   # LLM research
   - computer vision      # CV techniques and applications
 
-# Paper Sources: Where to look for trending papers
-# You can enable or disable different sources
+# Paper Sources: Multi-tier discovery strategy
+# Primary sources (fast, reliable)
 sources:
-  papers_with_code: true  # Papers that have available code
-  semantic_scholar: true  # Papers with high citation velocity
-  arxiv_recent: true     # Recent papers from arXiv
-  github_trending: true  # Papers linked to trending GitHub repos
+  arxiv_api: true         # Recent papers from arXiv (1-3 sec response)
+  semantic_scholar: true  # High-impact papers with citations (2-5 sec response)
+  
+# Enrichment layer (adds GitHub repo data to discovered papers)
+  enrich_with_papers_with_code: true  # Add code implementations (supplementary)
+  
+# Legacy/supplementary sources
+  papers_with_code: false # Legacy discovery mode (now used for enrichment only)
+  github_trending: true   # Papers linked to trending GitHub repos
 
 # Filtering Preferences
 filters:

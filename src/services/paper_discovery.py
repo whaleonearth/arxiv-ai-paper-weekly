@@ -16,16 +16,25 @@ from ..core.config import UserInterests
 from ..data.paper_models import TrendingPaper, TrendingReason
 from ..integrations.papers_with_code import discover_trending_papers
 from ..integrations.github_trending import discover_trending_papers_from_github
+from ..integrations.arxiv_api import discover_recent_papers
+from ..integrations.semantic_scholar_api import discover_impactful_papers
+from ..integrations.papers_enrichment import enrich_papers_with_code_data
 
 
 @dataclass
 class DiscoveryConfig:
     """Configuration for paper discovery."""
     
-    # Source configuration
-    use_papers_with_code: bool = True
+    # Primary source configuration (fast, reliable)
+    use_arxiv_api: bool = True
+    use_semantic_scholar: bool = True
+    
+    # Legacy/supplementary source configuration
+    use_papers_with_code: bool = False  # Now used for enrichment only
     use_github_trending: bool = True
-    use_arxiv_recent: bool = False  # Future implementation
+    
+    # Enrichment configuration
+    enrich_with_papers_with_code: bool = True  # Add GitHub repo data
     
     # API tokens
     github_token: Optional[str] = None
@@ -274,9 +283,43 @@ class PaperDiscoveryService:
         source_stats = {}
         errors = []
         
-        logger.info("Starting paper discovery from multiple sources...")
+        logger.info("Starting paper discovery with arXiv + Semantic Scholar + Papers with Code enrichment...")
         
-        # Discover from each source
+        # Primary sources: arXiv API (recent papers)
+        if self.config.use_arxiv_api:
+            try:
+                arxiv_papers = discover_recent_papers(
+                    user_interests=self.user_interests,
+                    days_back=self.config.days_back,
+                    max_papers=self.config.max_papers_per_source
+                )
+                all_papers.extend(arxiv_papers)
+                source_stats["arxiv_api"] = len(arxiv_papers)
+                logger.info(f"arXiv API: {len(arxiv_papers)} papers")
+            except Exception as e:
+                error_msg = f"arXiv API error: {e}"
+                errors.append(error_msg)
+                logger.error(error_msg)
+                source_stats["arxiv_api"] = 0
+        
+        # Primary sources: Semantic Scholar (impactful papers)
+        if self.config.use_semantic_scholar:
+            try:
+                semantic_papers = discover_impactful_papers(
+                    user_interests=self.user_interests,
+                    days_back=min(self.config.days_back * 4, 30),  # Longer period for citations
+                    max_papers=self.config.max_papers_per_source
+                )
+                all_papers.extend(semantic_papers)
+                source_stats["semantic_scholar"] = len(semantic_papers)
+                logger.info(f"Semantic Scholar: {len(semantic_papers)} papers")
+            except Exception as e:
+                error_msg = f"Semantic Scholar error: {e}"
+                errors.append(error_msg)
+                logger.error(error_msg)
+                source_stats["semantic_scholar"] = 0
+        
+        # Legacy source: Papers with Code (only if enabled)
         if self.config.use_papers_with_code:
             try:
                 pwc_papers = discover_trending_papers(
@@ -292,6 +335,7 @@ class PaperDiscoveryService:
                 logger.error(error_msg)
                 source_stats["papers_with_code"] = 0
         
+        # Supplementary source: GitHub Trending
         if self.config.use_github_trending:
             try:
                 github_papers = discover_trending_papers_from_github(
@@ -314,6 +358,18 @@ class PaperDiscoveryService:
         # Deduplicate papers
         unique_papers = self.deduplicator.deduplicate_papers(all_papers)
         total_after_deduplication = len(unique_papers)
+        
+        # Enrich papers with Papers with Code repository data
+        if self.config.enrich_with_papers_with_code and unique_papers:
+            try:
+                logger.info("Enriching papers with GitHub repository data...")
+                unique_papers = enrich_papers_with_code_data(unique_papers)
+                enriched_count = sum(1 for p in unique_papers if p.primary_repository is not None)
+                logger.info(f"Successfully enriched {enriched_count}/{len(unique_papers)} papers with code repositories")
+            except Exception as e:
+                error_msg = f"Papers with Code enrichment error: {e}"
+                errors.append(error_msg)
+                logger.warning(error_msg)
         
         # Calculate interest scores for all papers
         for paper in unique_papers:

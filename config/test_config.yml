@@ -1,0 +1,30 @@
+research_areas:
+  - machine learning
+  - computer vision
+
+categories:
+  - cs.LG
+  - cs.CV
+  - cs.AI
+
+keywords:
+  - neural networks
+  - deep learning
+  - transformers
+
+sources:
+  papers_with_code: true
+  github_trending: false
+  arxiv_recent: false
+
+filters:
+  min_engagement_score: 5.0
+  min_code_quality: 3.0
+  require_code: false
+
+email:
+  max_papers_per_email: 10
+  include_abstracts: true
+  include_code_links: true
+  include_pdf_links: true
+  language: "English"
