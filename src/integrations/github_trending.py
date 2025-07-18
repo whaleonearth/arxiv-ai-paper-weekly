@@ -7,7 +7,7 @@ high-quality code that might indicate trending research areas.
 
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any, Set
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import requests
 import re
 import time
@@ -385,7 +385,7 @@ class GitHubTrendingConverter:
             github_stars=repo.stars,
             github_forks=repo.forks,
             github_issues=repo.open_issues,
-            days_since_publication=max(1, (datetime.now() - repo.created_at).days),
+            days_since_publication=max(1, (datetime.now(timezone.utc) - repo.created_at).days),
             last_activity_date=repo.pushed_at
         )
         
@@ -393,7 +393,7 @@ class GitHubTrendingConverter:
         trending_reasons = []
         if repo.stars > 100:
             trending_reasons.append(TrendingReason.HIGH_GITHUB_ACTIVITY)
-        if (datetime.now() - repo.created_at).days <= 30:
+        if (datetime.now(timezone.utc) - repo.created_at).days <= 30:
             trending_reasons.append(TrendingReason.RECENT_PUBLICATION)
         if code_repo.calculate_quality_score() >= 7:
             trending_reasons.append(TrendingReason.CODE_QUALITY)

@@ -45,7 +45,7 @@ class DiscoveryConfig:
     max_total_papers: int = 100
     
     # Ranking parameters
-    min_engagement_score: float = 10.0
+    min_engagement_score: float = 5.0  # Lower threshold to ensure papers are found
     engagement_weight: float = 0.5
     interest_weight: float = 0.3
     code_quality_weight: float = 0.2
@@ -53,6 +53,29 @@ class DiscoveryConfig:
     # Deduplication parameters
     title_similarity_threshold: float = 0.8
     arxiv_id_match: bool = True
+    
+    @classmethod
+    def from_user_interests(cls, user_interests: UserInterests, **kwargs) -> 'DiscoveryConfig':
+        """Create DiscoveryConfig from UserInterests configuration.
+        
+        Args:
+            user_interests: User interests configuration
+            **kwargs: Additional override parameters
+            
+        Returns:
+            DiscoveryConfig instance
+        """
+        sources = user_interests.sources
+        
+        return cls(
+            use_arxiv_api=getattr(sources, 'arxiv_api', True),
+            use_semantic_scholar=getattr(sources, 'semantic_scholar', True),
+            use_papers_with_code=getattr(sources, 'papers_with_code', False),
+            use_github_trending=getattr(sources, 'github_trending', True),
+            enrich_with_papers_with_code=getattr(sources, 'enrich_with_papers_with_code', True),
+            min_engagement_score=getattr(user_interests.filters, 'min_engagement_score', 5.0),
+            **kwargs
+        )
 
 
 @dataclass
@@ -290,7 +313,7 @@ class PaperDiscoveryService:
             try:
                 arxiv_papers = discover_recent_papers(
                     user_interests=self.user_interests,
-                    days_back=self.config.days_back,
+                    days_back=max(self.config.days_back, 14),  # Minimum 14 days for arXiv to ensure papers found
                     max_papers=self.config.max_papers_per_source
                 )
                 all_papers.extend(arxiv_papers)
@@ -307,7 +330,7 @@ class PaperDiscoveryService:
             try:
                 semantic_papers = discover_impactful_papers(
                     user_interests=self.user_interests,
-                    days_back=min(self.config.days_back * 4, 30),  # Longer period for citations
+                    days_back=min(self.config.days_back * 8, 60),  # Much longer period for citations (up to 60 days)
                     max_papers=self.config.max_papers_per_source
                 )
                 all_papers.extend(semantic_papers)
@@ -491,7 +514,8 @@ def create_discovery_service(
     Returns:
         Configured discovery service
     """
-    config = DiscoveryConfig(
+    config = DiscoveryConfig.from_user_interests(
+        user_interests,
         github_token=github_token,
         days_back=days_back,
         max_total_papers=max_papers

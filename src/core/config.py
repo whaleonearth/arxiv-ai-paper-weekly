@@ -51,10 +51,19 @@ class FilterConfig:
 @dataclass
 class SourceConfig:
     """Configuration for paper sources."""
-    papers_with_code: bool = True
+    # Primary sources (fast, reliable)
+    arxiv_api: bool = True
     semantic_scholar: bool = True
-    arxiv_recent: bool = True
+    
+    # Enrichment layer
+    enrich_with_papers_with_code: bool = True
+    
+    # Legacy/supplementary sources
+    papers_with_code: bool = False  # Now used for enrichment only
     github_trending: bool = True
+    
+    # Legacy fields for backward compatibility
+    arxiv_recent: bool = True  # Maps to arxiv_api
 
 
 @dataclass

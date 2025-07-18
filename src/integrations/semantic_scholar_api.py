@@ -27,7 +27,7 @@ class SemanticScholarConfig:
     request_timeout: int = 30
     max_retries: int = 3
     papers_per_request: int = 100
-    rate_limit_delay: float = 0.1  # Semantic Scholar allows 10 requests/second
+    rate_limit_delay: float = 1.0  # Conservative rate limiting to avoid 429 errors
     fields: List[str] = None
     
     def __post_init__(self):
@@ -133,15 +133,41 @@ class SemanticScholarAPI:
             'fields': ','.join(self.config.fields)
         }
         
-        response = self.session.get(
-            url,
-            params=params,
-            timeout=self.config.request_timeout
-        )
-        response.raise_for_status()
+                # Add retry logic with exponential backoff for rate limiting
+        max_retries = 3
+        base_delay = 2.0
         
-        data = response.json()
-        return data.get('data', [])
+        for attempt in range(max_retries):
+            try:
+                response = self.session.get(
+                    url,
+                    params=params,
+                    timeout=self.config.request_timeout
+                )
+                response.raise_for_status()
+                
+                data = response.json()
+                return data.get('data', [])
+                
+            except requests.HTTPError as e:
+                if e.response.status_code == 429 and attempt < max_retries - 1:
+                    # Rate limited - wait and retry with exponential backoff
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"Rate limited by Semantic Scholar, retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(delay)
+                    continue
+                else:
+                    raise  # Re-raise if not rate limited or out of retries
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"Request failed, retrying in {delay:.1f}s: {e}")
+                    time.sleep(delay)
+                    continue
+                else:
+                    raise  # Re-raise if out of retries
+        
+        return []  # Fallback if all retries failed
     
     def _build_queries(self, user_interests: UserInterests) -> List[str]:
         """Build search queries from user interests.

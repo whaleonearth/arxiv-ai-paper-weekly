@@ -430,28 +430,6 @@ SMTP_PORT: 587
 
 **Other providers:** Check your email provider's SMTP settings
 
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    A[User Interests] --> B[Paper Discovery Service]
-    C[Papers with Code API] --> B
-    D[GitHub Trending API] --> B
-    
-    B --> E[Interest Matcher]
-    B --> F[Deduplicator] 
-    B --> G[Engagement Filter]
-    
-    E --> H[Ranked Papers]
-    F --> H
-    G --> H
-    
-    H --> I[AI Summarization]
-    I --> J[Enhanced Email Report]
-    
-    K[GitHub Actions] --> L[Dynamic Configuration]
-    L --> A
-```
 
 ## 🗺️ Roadmap
 
