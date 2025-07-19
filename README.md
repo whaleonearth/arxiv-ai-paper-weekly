@@ -142,6 +142,7 @@ flowchart TD
 ## 📷 Email Preview
 
 ![Email Screenshot](./assets/screenshot.png)
+![Email View Code Screenshot](./assets/screenshot_code.png)
 
 *Rich email format shows engagement metrics, trending reasons, AI summaries, and code quality scores*
 
