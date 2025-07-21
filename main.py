@@ -177,7 +177,7 @@ def discover_trending_papers(env_config: dict, user_interests) -> List[TrendingP
         raise
 
 
-def generate_paper_summaries(papers: List[TrendingPaper], max_summaries: int = 5, env_config: dict = None) -> None:
+def generate_paper_summaries(papers: List[TrendingPaper], max_summaries: int = 10, env_config: dict = None) -> None:
     """Generate AI summaries for top papers that don't have them.
     
     Args:
@@ -349,7 +349,7 @@ def main() -> None:
             logger.info(f"  {i}. {paper.title} (score: {score:.1f}, reasons: {sources})")
         
         # Generate AI summaries for top papers
-        top_paper_count = min(5, len(papers))  # Summarize top 5 papers
+        top_paper_count = min(10, len(papers))  # Summarize top 10 papers
         generate_paper_summaries(papers, max_summaries=top_paper_count, env_config=env_config)
         
         # Send email report

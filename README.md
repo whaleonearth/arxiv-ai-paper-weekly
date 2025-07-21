@@ -307,6 +307,8 @@ Days Back: 5
 
 ### AI Summary Configuration
 
+**📊 AI Summary Coverage**: The system generates AI summaries for the **top 10 highest-ranked papers** in each email to provide detailed insights where they matter most.
+
 **🤖 Local Models (Privacy & Cost-Free)**
 ```bash
 # 1. Download a model to the models/ directory
@@ -318,7 +320,7 @@ wget https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3
 USE_LOCAL_MODEL=1
 ```
 
-💰 **Cost Comparison**: OpenAI GPT-4o costs ~$0.10-0.30 per email (5-15 papers) vs **$0.00 with local models**
+💰 **Cost Comparison**: OpenAI GPT-4o costs ~$0.20-0.50 per email (top 10 papers) vs **$0.00 with local models**
 
 **☁️ Cloud API (Premium Quality)**
 ```bash
@@ -425,9 +427,11 @@ Your daily email includes:
 - Code quality assessment
 
 ### 🤖 **AI-Generated Summary**
+
 - Concise TL;DR of key contributions
-- Practical implications and applications
+- Practical implications and applications  
 - Why it's relevant to your interests
+- **Note**: AI summaries are generated for the top 10 highest-ranked papers
 
 ### 💻 **Code & Resources**
 - Primary repository with quality score
