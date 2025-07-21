@@ -1,4 +1,4 @@
-name: Send emails daily
+name: Send emails weekly
 on:
   workflow_dispatch:
     inputs:
@@ -25,7 +25,7 @@ on:
         type: number
         default: 7
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '0 22 * * 1'  # Weekly on Monday at 22:00 UTC
 
 jobs:
   calculate-and-send:

@@ -284,11 +284,11 @@ flowchart TD
 
    ![Test Results](./assets/test.png)
 
-### 5. Enable Daily Reports
+### 5. Enable Weekly Reports
 
-The system automatically runs daily at 22:00 UTC. You can:
+The system automatically runs weekly at 22:00 UTC on Mondays. You can:
 - Modify the schedule in `.github/workflows/main.yml`
-- Run manually anytime using **"Send emails daily"** workflow
+- Run manually anytime using **"Send emails weekly"** workflow
 - Customize interests for each run using the workflow interface
 
 ## 🔧 Advanced Features
